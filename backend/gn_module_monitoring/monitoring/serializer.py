@@ -302,12 +302,16 @@ class MonitoringObjectSerializer(MonitoringObjectBase):
             self.preprocess_data(properties)
 
         # ajout des données en base
+        # FIXME: condition peu compréhensible
         if (
             hasattr(self._model, "from_geofeature")
+            # FIXME: ce `not (len(list(post_data)) == 1` n'est pas beau du tout
+            # `and not (len(post_data.keys()) == 1 and "properties" in post_data)`... maybe
             and not (len(list(post_data)) == 1 and list(post_data)[0] == "properties")
             and post_data["geometry"] is not None
         ):
             for key in list(post_data):
+                # FIXME: this could be better done using marshmallow
                 if key not in ("properties", "geometry", "type"):
                     post_data.pop(key)
             self._model.from_geofeature(post_data, True)

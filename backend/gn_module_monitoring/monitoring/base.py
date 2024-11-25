@@ -96,6 +96,7 @@ class MonitoringObjectBase:
     def __str__(self):
         return "monitoringobject {}, {}, {}".format(self._module_code, self._object_type, self._id)
 
+    # FIXME: factory (méthode) avec un nom de classe...
     def MonitoringModel(self):
         try:
             Model = monitoring_definitions.MonitoringModel(self._object_type)

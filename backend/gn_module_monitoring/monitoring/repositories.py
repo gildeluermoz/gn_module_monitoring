@@ -17,7 +17,10 @@ log = logging.getLogger(__name__)
 
 
 class MonitoringObject(MonitoringObjectSerializer):
+    # usages ?
+    # FIXME: documenter cette méthode
     def get(self, value=None, field_name=None, depth=0):
+
         # par defaut on filtre sur l'id
         if not field_name:
             field_name = self.config_param("id_field_name")
@@ -62,6 +65,7 @@ class MonitoringObject(MonitoringObjectSerializer):
                 f"MONITORING : get_object {self._module_code} {self._object_type} ({field_name}={value}) : {e}"
             )
 
+    # FIXME: pourrait être une méthode protected
     def process_post_data_properties(self, post_data):
         # id_parent dans le cas d'heritage
 
@@ -93,6 +97,8 @@ class MonitoringObject(MonitoringObjectSerializer):
         )
         return True
 
+    # utilisée pour fonction create_or_update_object_api dans gn_module_monitoring.routes.monitoring
+    # fonction ell-même utilisée pour des endpoints dans routes.{monitoring,site,sites_groups}
     def create_or_update(self, post_data):
         try:
             # si id existe alors c'est un update
@@ -120,6 +126,7 @@ class MonitoringObject(MonitoringObjectSerializer):
         except Exception as e:
             raise GeoNatureError("MONITORING: create_or_update {} : {}".format(self, str(e)))
 
+    # FIXME: ne semble pas utilisée
     def delete(self):
         if not self._id:
             raise GeoNatureError("Monitoring : delete object has no id")
@@ -137,6 +144,7 @@ class MonitoringObject(MonitoringObjectSerializer):
         except Exception as e:
             raise GeoNatureError("Delete {} raise error {}".format(self, str(e)))
 
+    # FIXME: pourrait être une méthode protected
     def breadcrumb(self, params):
         if not self._id:
             return
@@ -178,6 +186,8 @@ class MonitoringObject(MonitoringObjectSerializer):
 
         return breadcrumbs
 
+    # appelé par le endpoint 'list_object_api' dans les monitoring routes
+    # l'unique usage par le frontend semble être pour une liste des sites groups... qui ne semble servir à rien.
     def get_list(self, args=None):
         """
         renvoie une liste d'objet serialisés

@@ -53,6 +53,7 @@ def get_monitorings_path():
     return module
 
 
+# FIXME: not used?
 def get_base_last_modif(module):
     """
     renvoie (en seconde depuis le 1 1 1970) la date de modif du module
