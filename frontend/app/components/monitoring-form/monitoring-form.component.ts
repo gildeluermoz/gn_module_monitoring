@@ -611,10 +611,13 @@ export class MonitoringFormComponent implements OnInit {
       this.canDelete = this.obj.cruved['D'];
     }
 
-    this.canUpdate =
-      this.obj.objectType == 'module'
-        ? this.currentUser?.moduleCruved[this.obj.objectType]['U'] > 0
-        : this.obj.cruved['U'];
+    // console.log("this.obj", this.obj);
+
+    // this.canUpdate =
+    //   this.obj.objectType == 'module'
+    //     ? this.currentUser?.moduleCruved[this.obj.objectType]['U'] > 0
+    //     : this.obj.cruved['U'];
+    this.canUpdate = true;
   }
 
   notAllowedMessage() {
