@@ -42,6 +42,7 @@ from gn_module_monitoring.utils.routes import (
     filter_according_to_column_type_for_site,
     sort_according_to_column_type_for_site,
     get_objet_with_permission_boolean,
+    paginate_scope_refacto,
 )
 
 
@@ -142,7 +143,13 @@ def get_sites(object_type, module_code=None):
     query = sort_according_to_column_type_for_site(query, sort_label, sort_dir)
 
     query_allowed = TMonitoringSites.filter_by_readable(query=query, object_code=object_code)
-    return paginate_scope(
+
+    if module_code:
+        paginate_func = paginate_scope_refacto
+    else:
+        paginate_func = paginate_scope
+
+    return paginate_func(
         query=query_allowed,
         schema=MonitoringSitesSchema,
         limit=limit,

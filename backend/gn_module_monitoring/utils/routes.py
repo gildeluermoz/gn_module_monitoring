@@ -48,6 +48,7 @@ def paginate(query: Select, schema: Schema, limit: int, page: int) -> Response:
 def paginate_scope(
     query: Select, schema: Schema, limit: int, page: int, object_code=None
 ) -> Response:
+    print("hello classic")
     result = DB.paginate(query, page=page, per_page=limit, error_out=False)
 
     pagination_schema = paginate_schema(schema)
@@ -55,6 +56,34 @@ def paginate_scope(
     datas_allowed = pagination_schema().dump(
         dict(items=result.items, count=result.total, limit=limit, page=page)
     )
+
+    cruved_item_dict = get_objet_with_permission_boolean(result, object_code=object_code)
+    for cruved_item in cruved_item_dict:
+        for i, data in enumerate(datas_allowed["items"]):
+            if data[data["pk"]] == cruved_item[data["pk"]]:
+                datas_allowed["items"][i]["cruved"] = cruved_item["cruved"]
+    return jsonify(datas_allowed)
+
+
+# TODO: voir pour réunifier le traitement spécial sur `data` avec la fonction originale ci-dessus
+def paginate_scope_refacto(
+    query: Select, schema: Schema, limit: int, page: int, object_code=None
+) -> Response:
+    print("hello refacto")
+    result = DB.paginate(query, page=page, per_page=limit, error_out=False)
+
+    pagination_schema = paginate_schema(schema)
+
+    datas_allowed = pagination_schema().dump(
+        dict(items=result.items, count=result.total, limit=limit, page=page)
+    )
+
+    # TODO: voir pour faire cette opération d'extraction des props de `data` au niveau des schémas Marshmallow
+    for item in datas_allowed["items"]:
+        for data_name, data_value in item["data"].items():
+            item[data_name] = data_value
+        del item["data"]
+
     cruved_item_dict = get_objet_with_permission_boolean(result, object_code=object_code)
     for cruved_item in cruved_item_dict:
         for i, data in enumerate(datas_allowed["items"]):
