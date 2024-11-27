@@ -45,8 +45,11 @@ def get_config_sites_groups(id=None, module_code="generic", object_type="sites_g
 
 
 @blueprint.route("/sites_groups", methods=["GET"], defaults={"object_type": "sites_group"})
+@blueprint.route(
+    "/refacto/<string:module_code>/sites_groups", methods=["GET"], defaults={"object_type": "site"}
+)
 @check_cruved_scope("R", module_code=MODULE_CODE, object_code="MONITORINGS_GRP_SITES")
-def get_sites_groups(object_type: str):
+def get_sites_groups(object_type: str, module_code=None):
     object_code = "MONITORINGS_GRP_SITES"
     params = MultiDict(request.args)
     limit, page = get_limit_page(params=params)
@@ -55,6 +58,12 @@ def get_sites_groups(object_type: str):
         params=params, default_sort="id_sites_group", default_direction="desc"
     )
     query = select(TMonitoringSitesGroups)
+
+    if module_code:
+        query = query.where(
+            TMonitoringSitesGroups.modules.any(TMonitoringModules.module_code == module_code)
+        )
+
     query = filter_params(TMonitoringSitesGroups, query=query, params=params)
 
     # PATCH order by modules
