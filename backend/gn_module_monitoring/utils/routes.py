@@ -48,7 +48,6 @@ def paginate(query: Select, schema: Schema, limit: int, page: int) -> Response:
 def paginate_scope(
     query: Select, schema: Schema, limit: int, page: int, object_code=None
 ) -> Response:
-    print("hello classic")
     result = DB.paginate(query, page=page, per_page=limit, error_out=False)
 
     pagination_schema = paginate_schema(schema)
@@ -69,7 +68,6 @@ def paginate_scope(
 def paginate_scope_refacto(
     query: Select, schema: Schema, limit: int, page: int, object_code=None
 ) -> Response:
-    print("hello refacto")
     result = DB.paginate(query, page=page, per_page=limit, error_out=False)
 
     pagination_schema = paginate_schema(schema)
