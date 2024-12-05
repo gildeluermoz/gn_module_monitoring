@@ -258,14 +258,25 @@ class MonitoringObjectSerializer(MonitoringObjectBase):
                 # on passe d'une list d'objet à une liste d'id
                 # si type_util est defini pour ce champs
                 # si on a bien affaire à une liste de modèles sqla
-                properties[key] = [
-                    (
-                        getattr(v, id_field_name_dict[type_util])
-                        if (isinstance(v, DB.Model) and type_util)
-                        else v.as_dict() if (isinstance(v, DB.Model) and not type_util) else v
-                    )
-                    for v in value
-                ]
+                # FIXME : c'est incompréhensible !
+                # properties[key] = [
+                #     (
+                #         getattr(v, id_field_name_dict[type_util])
+                #         if (isinstance(v, DB.Model) and type_util)
+                #         else v.as_dict() if (isinstance(v, DB.Model) and not type_util) else v
+                #     )
+                #     for v in value
+                # ]
+                new_values = []
+                for v in value:
+                    if isinstance(v, DB.Model):
+                        if type_util:
+                            new_values.append(getattr(v, id_field_name_dict[type_util]))
+                        else:
+                            new_values.append(v.as_dict())
+                    else:
+                        new_values.append(v)
+                properties[key] = new_values
 
         properties["id_parent"] = to_int(self.id_parent())
 
@@ -280,6 +291,56 @@ class MonitoringObjectSerializer(MonitoringObjectBase):
 
         if children:
             monitoring_object_dict["children"] = children
+
+        return monitoring_object_dict
+
+    def serialize_refacto(self):
+        if not self._model:
+            self._model = self.MonitoringModel()
+
+        # Liste des propriétés de l'objet qui doivent être récupérées
+        display_properties = []
+        # Liste des propriétés spécifique de l'objet qui doivent être récupérées
+        display_specific = []
+
+        dump_object = MonitoringSerializer_dict[self._object_type](unknown=EXCLUDE).dump(
+            self._model
+        )
+        properties = dump_object
+
+        # Extraction des proprités spécifiques au même niveau que les génériques
+        self.flatten_specific_properties(properties, only=display_specific)
+
+        schema = self.config_schema()
+
+        for key in schema:
+            if key in properties:
+                definition = schema[key]
+                value = properties[key]
+                if not isinstance(value, list):
+                    continue
+
+                type_util = definition.get("type_util")
+
+                # on passe d'une list d'objet à une liste d'id
+                # si type_util est defini pour ce champs
+                # si on a bien affaire à une liste de modèles sqla
+                properties[key] = [
+                    (
+                        getattr(v, id_field_name_dict[type_util])
+                        if (isinstance(v, DB.Model) and type_util)
+                        else v.as_dict() if (isinstance(v, DB.Model) and not type_util) else v
+                    )
+                    for v in value
+                ]
+
+        # mdu: je retire les 'additional_data_keys' pour coller à la demande du frontend
+        del properties["additional_data_keys"]
+
+        monitoring_object_dict = {
+            "cruved": self.get_cruved_by_object(),
+        }
+        monitoring_object_dict.update(properties)
 
         return monitoring_object_dict
 

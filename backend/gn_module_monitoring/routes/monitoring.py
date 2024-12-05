@@ -119,6 +119,37 @@ def get_monitoring_object_api(scope, module_code=None, object_type="module", id=
     )
 
 
+@blueprint.route("/refacto/<string:module_code>/sites/<int:id>", methods=["GET"])
+# @check_cruved_scope("R")
+@json_resp
+# @permissions.check_cruved_scope("R", get_scope=True)
+# def get_site_by_id_refacto(scope, module_code, id):
+def get_site_by_id_refacto(module_code, id):
+    return get_monitoring_object_api_refacto("foo", module_code, "site", id)
+
+
+@blueprint.route("/refacto/<string:module_code>/sites_groups/<int:id>", methods=["GET"])
+@check_cruved_scope("R")
+@json_resp
+@permissions.check_cruved_scope("R", get_scope=True)
+def get_sites_group_by_id_refacto(scope, module_code, id):
+    return get_monitoring_object_api_refacto(scope, module_code, "sites_group", id)
+
+
+def get_monitoring_object_api_refacto(scope, module_code, object_type, id):
+
+    config = get_config(module_code, force=True)
+
+    monitoring_obj = monitoring_definitions.monitoring_object_instance(
+        module_code, object_type, config=config, id=id
+    )
+    object = monitoring_obj.get()
+    # if not object._model.has_instance_permission(scope=scope):
+    #     raise Forbidden(f"User {g.current_user} cannot read {object_type} {object._id}")
+
+    return object.serialize_refacto()
+
+
 def create_or_update_object_api(module_code, object_type, id=None):
     """
     route pour la création ou la modification d'un objet
