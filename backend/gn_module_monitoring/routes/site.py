@@ -155,6 +155,7 @@ def get_sites(object_type, module_code=None):
         limit=limit,
         page=page,
         object_code=object_code,
+        object_type=object_type,
     )
 
 

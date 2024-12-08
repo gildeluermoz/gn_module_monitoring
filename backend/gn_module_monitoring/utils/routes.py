@@ -46,11 +46,13 @@ def paginate(query: Select, schema: Schema, limit: int, page: int) -> Response:
 
 
 def paginate_scope(
-    query: Select, schema: Schema, limit: int, page: int, object_code=None
+    query: Select, schema: Schema, limit: int, page: int, object_code=None, object_type=None
 ) -> Response:
     result = DB.paginate(query, page=page, per_page=limit, error_out=False)
 
-    pagination_schema = paginate_schema(schema)
+    from gn_module_monitoring.monitoring.schemas import add_specific_attributes
+
+    pagination_schema = paginate_schema(add_specific_attributes(schema, object_type))
 
     datas_allowed = pagination_schema().dump(
         dict(items=result.items, count=result.total, limit=limit, page=page)
@@ -246,6 +248,8 @@ def get_object_list_monitorings():
         raise GeoNatureError("MONITORINGS - get_object_list_monitorings : {}".format(str(e)))
 
 
+# FIXME : objet => objects dans le nom de la fonction
+# FIXME : remove useless int type hint for consistency
 def get_objet_with_permission_boolean(
     objects, depth: int = 0, module_code=None, object_code=None, id_role=None
 ):
