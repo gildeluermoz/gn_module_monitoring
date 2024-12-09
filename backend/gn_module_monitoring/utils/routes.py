@@ -67,8 +67,9 @@ def paginate_scope(
 
 
 # TODO: voir pour réunifier le traitement spécial sur `data` avec la fonction originale ci-dessus
+# FIXME : ajout de object_type car donné en param par la view
 def paginate_scope_refacto(
-    query: Select, schema: Schema, limit: int, page: int, object_code=None
+    query: Select, schema: Schema, limit: int, page: int, object_code=None, object_type=None
 ) -> Response:
     result = DB.paginate(query, page=page, per_page=limit, error_out=False)
 
